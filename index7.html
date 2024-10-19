@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best-Performing Student Recognition System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 10px;
+            background: #e9ecef;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+
+        .student-input {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Page -->
+    <div class="container" id="loginPage">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <input type="password" id="password" placeholder="Enter Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p id="loginError" style="color: red; display: none;">Incorrect password. Try again.</p>
+    </div>
+
+    <!-- Main Page (Hidden initially) -->
+    <div class="container hidden" id="mainPage">
+        <h1>Best-Performing Student Recognition System</h1>
+        <form id="studentForm">
+            <div id="studentInputs">
+                <!-- First student input block -->
+                <div class="student-input">
+                    <input type="text" placeholder="Student Name" required>
+                    <input type="number" placeholder="GPA (0-4)" step="0.1" required>
+                    <input type="number" placeholder="Hackathons Participated" required>
+                    <input type="number" placeholder="Paper Presentations" required>
+                    <input type="number" placeholder="Assisted Teachers" required>
+                </div>
+            </div>
+            <button type="button" id="addStudent">Add Another Student</button>
+            <button type="submit">Submit Students</button>
+        </form>
+        <h2>Top 3 Students</h2>
+        <ul id="topStudents"></ul>
+    </div>
+
+    <script>
+        const correctPassword = "admin123"; // Set the password for login
+        let students = [];
+
+        // Handle login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const enteredPassword = document.getElementById('password').value;
+
+            // Check if password matches
+            if (enteredPassword === correctPassword) {
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('mainPage').classList.remove('hidden');
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        // Add new student input fields dynamically
+        document.getElementById('addStudent').addEventListener('click', function() {
+            const studentInputs = document.getElementById('studentInputs');
+            const newStudentInput = document.createElement('div');
+            newStudentInput.classList.add('student-input');
+            newStudentInput.innerHTML = `
+                <input type="text" placeholder="Student Name" required>
+                <input type="number" placeholder="GPA (0-4)" step="0.1" required>
+                <input type="number" placeholder="Hackathons Participated" required>
+                <input type="number" placeholder="Paper Presentations" required>
+                <input type="number" placeholder="Assisted Teachers" required>
+            `;
+            studentInputs.appendChild(newStudentInput);
+        });
+
+        // Handle student form submission for multiple students
+        document.getElementById('studentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const inputs = document.querySelectorAll('.student-input');
+
+            // Clear previous student data
+            students = [];
+
+            // Iterate over each student input block
+            inputs.forEach(input => {
+                const name = input.children[0].value;
+                const gpa = parseFloat(input.children[1].value);
+                const hackathons = parseInt(input.children[2].value);
+                const presentations = parseInt(input.children[3].value);
+                const assists = parseInt(input.children[4].value);
+
+                // Calculate the score
+                const student = {
+                    name,
+                    gpa,
+                    hackathons,
+                    presentations,
+                    assists,
+                    score: calculateScore(gpa, hackathons, presentations, assists)
+                };
+
+                // Add student to array
+                students.push(student);
+            });
+
+            // Sort and display top 3 students
+            students.sort((a, b) => b.score - a.score);
+            displayTopStudents();
+
+            // Reset form inputs after submission
+            document.getElementById('studentInputs').innerHTML = `
+                <div class="student-input">
+                    <input type="text" placeholder="Student Name" required>
+                    <input type="number" placeholder="GPA (0-4)" step="0.1" required>
+                    <input type="number" placeholder="Hackathons Participated" required>
+                    <input type="number" placeholder="Paper Presentations" required>
+                    <input type="number" placeholder="Assisted Teachers" required>
+                </div>`;
+        });
+
+        // Function to calculate score
+        function calculateScore(gpa, hackathons, presentations, assists) {
+            return (gpa * 4) + (hackathons * 2) + (presentations * 3) + (assists * 1);
+        }
+
+        // Function to display top 3 students
+        function displayTopStudents() {
+            const topStudentsList = document.getElementById('topStudents');
+            topStudentsList.innerHTML = ''; // Clear previous list
+
+            const topThree = students.slice(0, 3); // Get top 3 students
+            topThree.forEach(student => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${student.name} - Score: ${student.score.toFixed(2)}`;
+                topStudentsList.appendChild(listItem);
+            });
+        }
+    </script>
+</body>
+</html>
